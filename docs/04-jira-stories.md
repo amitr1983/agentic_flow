@@ -1,5 +1,19 @@
 # Jira Stories
 
+## Jira Key Mapping
+
+| Local ID | Jira Key | Title | Status |
+|----------|----------|-------|--------|
+| COUNTER-1 | KAN-2 | Create Xcode project shell | Done |
+| COUNTER-2 | KAN-3 | Implement Counter model | Done |
+| COUNTER-3 | KAN-4 | Implement CounterViewModelProtocol and CounterViewModel | Done |
+| COUNTER-4 | KAN-5 | Build Counter UI (ContentView) | Done |
+| COUNTER-5 | KAN-6 | Write unit tests for Counter model | Done |
+| COUNTER-6 | KAN-7 | Write unit tests for CounterViewModel | Done |
+| COUNTER-7 | KAN-8 | Set up GitHub Actions CI | Done |
+
+---
+
 ## COUNTER-1 — Create Xcode project shell
 
 **Description**
@@ -19,7 +33,7 @@ As a developer, I want a correctly configured Xcode project so that the team has
 - Bundle ID / product name: `CounterApp`
 
 **Testing Notes**
-- Run `xcodebuild build -scheme CounterApp -destination 'platform=iOS Simulator,name=iPhone 16'` — must succeed with 0 errors
+- Run `xcodebuild build -scheme CounterApp -destination 'platform=iOS Simulator,OS=latest'` — must succeed with 0 errors
 - Run `xcodebuild test` on the same destination — must exit 0 even with an empty test suite
 
 **Size**: S
@@ -45,8 +59,7 @@ As a developer, I want a plain Swift `Counter` struct so that counter state and 
 - File location: `CounterApp/Models/Counter.swift`
 
 **Testing Notes**
-- Test class: `CounterTests`
-- Cases: `testIncrement`, `testDecrement`, `testDecrementBelowZero`, `testReset`, `testResetFromNegative`
+- Test class: `CounterTests` — see COUNTER-5
 - All assertions via `XCTAssertEqual`; no async, no mocks needed
 
 **Size**: S
@@ -74,9 +87,8 @@ As a developer, I want an `@Observable` ViewModel backed by a protocol so that t
 - Do not expose the internal `Counter` struct publicly; keep it `private`
 
 **Testing Notes**
-- Test class: `CounterViewModelTests`
+- Test class: `CounterViewModelTests` — see COUNTER-6
 - Declare test subject as `var sut: any CounterViewModelProtocol` to test through the protocol interface
-- Cases: `testInitialCountIsZero`, `testIncrement`, `testDecrement`, `testDecrementBelowZero`, `testReset`
 - No SwiftUI in the test file
 
 **Size**: S
@@ -107,13 +119,13 @@ As a user, I want to see a counter value on screen with **+**, **−**, and **Re
 
 **Testing Notes**
 - No unit tests for the view itself — logic is fully covered by COUNTER-2 and COUNTER-3
-- Manual smoke test: launch on iPhone 16 iOS 17 sim, tap **+** several times, tap **−**, tap **Reset**, force-quit and relaunch — verify FR1–FR5 at each step
+- Manual smoke test: launch on a simulator, tap **+** several times, tap **−**, tap **Reset**, force-quit and relaunch — verify FR1–FR5 at each step
 
 **Size**: S
 
 ---
 
-## COUNTER-6 — Write unit tests for Counter model
+## COUNTER-5 — Write unit tests for Counter model
 
 **Description**
 As a developer, I want a comprehensive unit test suite for `Counter` so that every mutation is verified at the model layer independently of any UI or ViewModel.
@@ -144,7 +156,7 @@ As a developer, I want a comprehensive unit test suite for `Counter` so that eve
 
 ---
 
-## COUNTER-7 — Write unit tests for CounterViewModel
+## COUNTER-6 — Write unit tests for CounterViewModel
 
 **Description**
 As a developer, I want a unit test suite that exercises `CounterViewModel` exclusively through `CounterViewModelProtocol` so that the ViewModel's contract is verified independently of any SwiftUI binding.
@@ -176,7 +188,7 @@ As a developer, I want a unit test suite that exercises `CounterViewModel` exclu
 
 ---
 
-## COUNTER-5 — Set up GitHub Actions CI
+## COUNTER-7 — Set up GitHub Actions CI
 
 **Description**
 As a developer, I want a CI workflow that runs `xcodebuild test` on every push to `main` and every pull request so that regressions are caught automatically before merge.
@@ -184,14 +196,14 @@ As a developer, I want a CI workflow that runs `xcodebuild test` on every push t
 **Acceptance Criteria**
 - [ ] `.github/workflows/ci.yml` exists in the repository
 - [ ] Workflow triggers on `push` to `main` and on `pull_request`
-- [ ] `xcodebuild test` targets an iPhone simulator matching the runner's available runtime
+- [ ] `xcodebuild test` targets an available iPhone simulator using `OS=latest` — no hard-coded simulator name
 - [ ] All unit tests pass in CI
-- [ ] No third-party GitHub Actions used (no `actions/cache`, marketplace test runners, etc.) beyond `actions/checkout`
+- [ ] No third-party GitHub Actions used beyond `actions/checkout`
 - [ ] A deliberately broken test causes the workflow to fail (verified manually)
 
 **Implementation Notes**
-- Runner: `macos-latest` (ships with Xcode 15+)
-- Simulator destination string: `platform=iOS Simulator,name=iPhone 16,OS=latest` — use `OS=latest` to avoid runtime version pinning that breaks when runners update
+- Runner: `macos-latest` (ships with a recent Xcode)
+- Select simulator dynamically at runtime using `xcrun simctl list` — avoids breakage when runner images update
 - Scheme name must match exactly what Xcode created (e.g. `CounterApp`)
 - `actions/checkout` is acceptable as it is a first-party GitHub action
 

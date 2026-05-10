@@ -56,7 +56,7 @@
 - [x] No UIKit anywhere in the project — verified
 - [ ] **Manual smoke test on iOS 17 simulator — PENDING** (requires human verification; cannot be automated in this environment)
 
-#### COUNTER-6 — Write unit tests for Counter model
+#### COUNTER-5 — Write unit tests for Counter model
 - [x] `CounterTests.swift` exists in test target — `CounterAppTests/CounterTests.swift`
 - [x] `testInitialCountIsZero` — passed ✅
 - [x] `testIncrement` — passed ✅
@@ -68,7 +68,7 @@
 - [x] `testIncrementThenReset` — passed ✅
 - [x] All 8 tests pass ✅
 
-#### COUNTER-7 — Write unit tests for CounterViewModel
+#### COUNTER-6 — Write unit tests for CounterViewModel
 - [x] `CounterViewModelTests.swift` exists with zero SwiftUI or UIKit imports ✅
 - [x] Subject declared as `var sut: any CounterViewModelProtocol` — `CounterViewModelTests.swift:5` ✅
 - [x] `testInitialCountIsZero` — passed ✅
@@ -81,10 +81,10 @@
 - [x] `testIncrementThenReset` — passed ✅
 - [x] All 8 tests pass ✅
 
-#### COUNTER-5 — Set up GitHub Actions CI
+#### COUNTER-7 — Set up GitHub Actions CI
 - [x] `.github/workflows/ci.yml` exists in the repository
 - [x] Workflow triggers on `push` to `main` and on `pull_request`
-- [x] `xcodebuild test` targets `platform=iOS Simulator,name=iPhone 16,OS=latest`
+- [x] Simulator selected dynamically at runtime via `xcrun simctl list` — no hard-coded device name
 - [x] No third-party GitHub Actions beyond `actions/checkout@v4`
 - [ ] **All unit tests pass in CI — PENDING** (first CI run not yet confirmed; pushed to `origin/main`, awaiting GitHub Actions result)
 - [ ] **Broken test causes workflow to fail — PENDING** (requires CI verification by human)
@@ -95,9 +95,9 @@
 
 1. **COUNTER-4 — Manual smoke test (FR1–FR5)**: Cannot be automated. The human must launch the app on an iOS 17+ simulator, tap **+**, **−**, and **Reset**, then force-quit and relaunch to verify FR5. All code paths are verified via unit tests but UI rendering requires manual confirmation.
 
-2. **COUNTER-5 — CI green run**: The workflow has been pushed but not yet observed running. Human should confirm the Actions tab shows a green run.
+2. **COUNTER-7 — CI green run**: The workflow has been pushed but not yet observed running. Human should confirm the Actions tab shows a green run.
 
-3. **COUNTER-6 — AC wording vs. implementation**: The story AC says "no imports beyond XCTest" but `@testable import CounterApp` is also present (required to access `Counter`). This is a wording imprecision in the story, not a defect — `@testable import` is standard XCTest practice and there are no SwiftUI/UIKit imports.
+3. **COUNTER-5 — AC wording vs. implementation**: The story AC says "no imports beyond XCTest" but `@testable import CounterApp` is also present (required to access `Counter`). This is a wording imprecision in the story, not a defect — `@testable import` is standard XCTest practice and there are no SwiftUI/UIKit imports.
 
 4. **ContentView — minor out-of-scope additions**: `ContentView` uses `.contentTransition(.numericText())` and `.animation(.snappy, value:)`. These are cosmetic-only and don't affect correctness, but they were not explicitly in scope. Not a defect — no AC is violated.
 

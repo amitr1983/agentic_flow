@@ -53,6 +53,22 @@ CLAUDE.md        # Session bootstrap for Claude Code
 AGENTS.md        # Overview of the human-agent contract
 ```
 
+## Source of Truth
+
+Confluence stores the official SDLC documents for this project.
+This repo keeps local copies under `docs/` for Claude Code execution.
+When a doc changes, update **both** the Confluence page and the matching local file.
+
+| Local file | Confluence page |
+|------------|-----------------|
+| `docs/01-project-definition.md` | 01 - Project Definition |
+| `docs/02-shape.md` | 02 - Shape |
+| `docs/03-bet-and-scope.md` | 03 - Bet & Scope |
+| `docs/04-jira-stories.md` | 04 - Jira Stories |
+| `docs/05-review-notes.md` | 05 - Review Notes |
+
+Confluence space: **MFS** — `https://amitrajoriya.atlassian.net/wiki/spaces/MFS`
+
 ## Current Project
 
 **Counter App** — Simple SwiftUI iOS counter with increment, decrement, and reset.

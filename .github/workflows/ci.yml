@@ -22,11 +22,27 @@ jobs:
         working-directory: src
         run: xcodegen generate
 
+      - name: Select simulator
+        run: |
+          UDID=$(xcrun simctl list -j devices available | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          for runtime, devices in data['devices'].items():
+              if 'iOS' not in runtime:
+                  continue
+              for device in devices:
+                  if device.get('isAvailable') and 'iPhone' in device['name']:
+                      print(device['udid'])
+                      sys.exit(0)
+          sys.exit(1)
+          ")
+          echo "SIMULATOR_UDID=$UDID" >> "$GITHUB_ENV"
+
       - name: Run tests
         working-directory: src
         run: |
           xcodebuild test \
             -scheme CounterApp \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -destination "id=$SIMULATOR_UDID" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
