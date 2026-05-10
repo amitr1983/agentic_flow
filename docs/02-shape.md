@@ -49,8 +49,13 @@ There is no loading state (all operations are instant and local) and no error st
 
 ## Technical Direction
 
-- **Framework:** SwiftUI for all UI; zero UIKit.
-- **Data flow:** `CounterModel` is a plain Swift class (no SwiftUI import) that owns `var count: Int`. The root `ContentView` holds a single instance via `@State` and passes it into child views as needed. No prop-drilling beyond one level since the app is one screen.
-- **State management:** `@Observable` macro (available since iOS 17, matching the deployment target). This avoids `ObservableObject` / `@Published` boilerplate and is the idiomatic modern approach.
-- **Testing:** `CounterModel` is a plain Swift type — unit tests import no SwiftUI and exercise `increment()`, `decrement()`, and `reset()` directly.
+- **Architecture:** MVVM
+  - `Counter` — plain Swift `struct` (Model); pure value type, no framework imports, owns `count: Int` and mutating operations.
+  - `CounterViewModelProtocol` — protocol defining the public interface (`count`, `increment()`, `decrement()`, `reset()`). Views depend on this, never on the concrete type (SOLID: Dependency Inversion).
+  - `CounterViewModel` — `@Observable` `final class` conforming to `CounterViewModelProtocol`; owns a `Counter` instance and delegates all mutations to it.
+  - `ContentView` — pure SwiftUI view; reads `count` and calls methods through the protocol. Zero business logic.
+- **Framework:** SwiftUI only; zero UIKit.
+- **Data flow:** `ContentView` calls methods on `CounterViewModelProtocol` → `CounterViewModel` mutates its `Counter` → `@Observable` propagates the change back to the view automatically.
+- **State management:** `@Observable` macro on `CounterViewModel` (iOS 17+). `ContentView` holds the instance via `@State private var viewModel: CounterViewModel`.
+- **Testing:** `Counter` (struct) unit-tested directly for value correctness. `CounterViewModel` tested via `CounterViewModelProtocol` for isolation. No SwiftUI in any test.
 - **Dependencies:** None. No Swift Package dependencies. No external CI tools beyond `xcodebuild`.

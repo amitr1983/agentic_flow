@@ -37,6 +37,18 @@ Each agent's role, inputs, outputs, and steps are defined in `agents/`.
 - Prefer SwiftUI. No UIKit.
 - Tests are required for all business logic.
 
+## Engineering Standards
+
+- **Architecture**: MVVM — Model (plain Swift value type), ViewModel (`@Observable`, protocol-backed), View (pure SwiftUI).
+- **SOLID**:
+  - Single Responsibility: Model owns data, ViewModel owns logic, View owns display.
+  - Open/Closed: Extend via protocols, not by modifying concrete types.
+  - Liskov Substitution: ViewModels conform to protocols; views depend on the protocol.
+  - Interface Segregation: Keep protocols focused and minimal.
+  - Dependency Inversion: Views depend on ViewModel protocols, not concrete classes.
+- **Clean Code**: Meaningful names, small focused methods, no magic values, no dead code, no comments that restate what the code already says.
+- **Principal iOS Engineer standard**: Code must be production-quality — correct, testable, idiomatic Swift.
+
 ## Current State
 
 | Doc | Status |
