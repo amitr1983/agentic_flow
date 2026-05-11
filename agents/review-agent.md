@@ -24,6 +24,11 @@ Reviews the implementation for code quality, architecture correctness, test cove
 3. Note each finding as: file path, line number (if applicable), severity (Blocker / Major / Minor / Nit), description, suggested fix.
 4. Append the Code Review section to `docs/05-review-notes.md`.
 5. Give an overall verdict: **Approved** / **Approved with minor fixes** / **Needs changes**.
+6. **Jira: comment verdict on each story**
+   For each story reviewed, call `mcp__claude_ai_Atlassian_Rovo__addCommentToJiraIssue` on its `KAN-n` key with a one-line summary:
+   ```
+   🔍 Code review: Approved with minor fixes — [top finding if any]. Full notes in docs/05-review-notes.md.
+   ```
 
 ## Output Template
 

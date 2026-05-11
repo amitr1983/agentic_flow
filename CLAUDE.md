@@ -27,6 +27,49 @@ Each agent's role, inputs, outputs, and steps are defined in `agents/`.
 | Review | `agents/review-agent.md` | `docs/05-review-notes.md` |
 | CI | `agents/ci-agent.md` | `.github/workflows/ci.yml` |
 
+## Jira Integration
+
+All agents that touch individual stories must keep Jira in sync as they work.
+
+- **Site (cloudId)**: `amitrajoriya.atlassian.net`
+- **Project key**: `KAN`
+- **Story key lookup**: Read the Jira Key Mapping table at the top of `docs/04-jira-stories.md` to map `COUNTER-n` → `KAN-n`.
+
+### MCP tools
+
+| Task | Tool |
+|------|------|
+| Get current user's accountId | `mcp__claude_ai_Atlassian_Rovo__atlassianUserInfo` |
+| List available transitions | `mcp__claude_ai_Atlassian_Rovo__getTransitionsForJiraIssue` |
+| Move story status | `mcp__claude_ai_Atlassian_Rovo__transitionJiraIssue` |
+| Assign story to user | `mcp__claude_ai_Atlassian_Rovo__editJiraIssue` |
+| Add comment to story | `mcp__claude_ai_Atlassian_Rovo__addCommentToJiraIssue` |
+
+### Lifecycle per story
+
+```
+jira-stories-agent creates ticket → assigns to current user (To Do)
+         ↓
+implementation-agent starts story → transitions to In Progress
+         ↓
+implementation-agent finishes story → transitions to Done
+         ↓
+qa-agent / review-agent → add comment with findings
+```
+
+### How to transition
+
+1. Call `getTransitionsForJiraIssue` with the `KAN-n` key to get available transition IDs.
+2. Match by name: `"In Progress"` or `"Done"` (names may vary — pick the closest match).
+3. Call `transitionJiraIssue` with that ID.
+
+### How to assign
+
+1. Call `atlassianUserInfo` to get `accountId` of the current user.
+2. Call `editJiraIssue` with `{"assignee": {"accountId": "<id>"}}` in the fields body.
+
+---
+
 ## Rules
 
 - The human owns product judgment, architecture decisions, and final approval.

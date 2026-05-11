@@ -21,6 +21,15 @@ Verifies the implementation against each story's acceptance criteria. Runs the t
 5. Check for regressions — does new code break any previously passing story?
 6. Write the QA section of `docs/05-review-notes.md` using the template below.
 7. If any acceptance criterion fails, list it clearly so the implementation agent can fix it.
+8. **Jira: comment findings on each story**
+   For each story verified, call `mcp__claude_ai_Atlassian_Rovo__addCommentToJiraIssue` on its `KAN-n` key with a brief QA summary:
+   ```
+   ✅ QA passed — all acceptance criteria verified. 16/16 tests pass, 0 warnings.
+   ```
+   or, if failures exist:
+   ```
+   ❌ QA findings — [list failing criteria and why]
+   ```
 
 ## Output Template
 

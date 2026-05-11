@@ -22,6 +22,11 @@ Creates a GitHub Actions CI workflow that builds and tests the iOS app on every 
      4. Report test results
 3. Verify the YAML is valid (`yamllint` or manual check).
 4. Commit: `ci: add GitHub Actions workflow`.
+5. **Jira: close the CI story**
+   a. Look up the CI story's Jira key from the Jira Key Mapping table in `docs/04-jira-stories.md`.
+   b. Call `mcp__claude_ai_Atlassian_Rovo__getTransitionsForJiraIssue` to get transition IDs.
+   c. Call `mcp__claude_ai_Atlassian_Rovo__transitionJiraIssue` with the "Done" transition ID.
+   d. Update the Status column in the mapping table to `Done`.
 
 ## Output Template
 

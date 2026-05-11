@@ -24,6 +24,10 @@ Translates scope slices into well-formed, implementation-ready Jira stories. Eac
    - **Size**: S / M / L (carry over from slice)
 5. Write `docs/04-jira-stories.md` using the template below.
 6. Show proposed stories to the human before marking done. Do not assign or create in Jira without approval.
+7. Once the human approves, for each story created in Jira:
+   a. Call `mcp__claude_ai_Atlassian_Rovo__atlassianUserInfo` to get the current user's `accountId`.
+   b. Call `mcp__claude_ai_Atlassian_Rovo__editJiraIssue` to assign the story to that `accountId`.
+   c. Add a Jira Key Mapping table at the top of `docs/04-jira-stories.md` (format: `COUNTER-n | KAN-n | Title | Status`).
 
 ## Output Template
 
