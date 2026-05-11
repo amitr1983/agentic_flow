@@ -1,63 +1,122 @@
 # agentic_flow
 
-A multi-agent SDLC repo for building iOS apps with Claude Code. Each stage of development is handled by a specialised agent, with human review and approval between each step.
+A structured, human-in-the-loop workflow for building iOS apps with Claude Code. Instead of asking Claude to "build me an app", you run specialised agents one stage at a time — each one does a focused job, writes its output, and waits for your approval before the next stage starts.
+
+The result is a full software development lifecycle (SDLC) where you stay in control of every decision, and Claude handles the execution.
+
+---
+
+## What Problem Does This Solve?
+
+When you ask an AI to build something large in one shot, you lose visibility and control. This repo breaks the work into eight named stages — from defining the product idea all the way to CI — with a human approval gate between each one. You can course-correct at any point, and nothing gets built without your sign-off.
+
+---
+
+## Prerequisites
+
+Before you start, make sure you have:
+
+- **Claude Code** installed and running (`claude` CLI)
+- **Xcode 15+** (for iOS development)
+- **xcodegen** installed — `brew install xcodegen`
+- **Atlassian account** (optional but recommended) — for Jira story tracking and Confluence docs
+- **GitHub account** — for pushing code and running CI
+- The **Atlassian Rovo MCP** connected in Claude Code settings (enables Jira + Confluence tools)
+
+---
 
 ## How It Works
 
-1. Each agent reads its input doc(s), does its work, and writes its output doc.
-2. The human reviews the output and approves before the next agent runs.
-3. No agent skips ahead without approval.
-
-## Pipeline
+There are eight agents, each responsible for one stage. You trigger an agent with a slash command, it does its work, and then you review the output. Only after you approve does the next stage begin.
 
 ```
-[You] Describe project
-       ↓
-product-agent   → docs/01-project-definition.md
-       ↓
-shape-agent     → docs/02-shape.md
-       ↓
-scope-agent     → docs/03-bet-and-scope.md
-       ↓
-jira-stories-agent → docs/04-jira-stories.md
-       ↓
-implementation-agent → src/
-       ↓
-qa-agent        → docs/05-review-notes.md
-       ↓
-review-agent    → docs/05-review-notes.md (appends)
-       ↓
-ci-agent        → .github/workflows/ci.yml
+You describe the project
+        ↓
+1. /product   →  Writes the project definition doc
+        ↓
+2. /shape     →  Designs the product shape (problem, appetite, solution)
+        ↓
+3. /scope     →  Breaks the shape into a scoped bet with slices
+        ↓
+4. /stories   →  Turns slices into Jira-ready user stories, creates tickets
+        ↓
+5. /implement →  Writes the iOS code story by story, runs tests
+        ↓
+6. /qa        →  Verifies every acceptance criterion, runs the test suite
+        ↓
+7. /review    →  Reviews code quality, architecture, and test coverage
+        ↓
+8. /ci        →  Sets up GitHub Actions to run tests on every push
 ```
 
-## Running an Agent
+At each stage, Claude writes a document or code, presents it to you, and waits. You say "looks good" or request changes. Nothing moves forward until you approve.
 
-Tell Claude which agent to run:
+---
+
+## Starting a New Project
+
+1. **Clone this repo** and open the folder in Claude Code.
+2. **Describe your project** in plain English — what you want to build and why.
+3. **Run `/product`** — Claude writes `docs/01-project-definition.md`. Review and approve.
+4. **Run `/shape`** — Claude designs the product shape. Review and approve.
+5. **Run `/scope`** — Claude scopes the bet into buildable slices. Review and approve.
+6. **Run `/stories`** — Claude writes user stories and (if Atlassian is connected) creates Jira tickets and assigns them to you. Review and approve.
+7. **Run `/implement`** — Claude implements the stories one by one. Each story is transitioned to "In Progress" in Jira while being worked on, then "Done" when committed. Run tests pass before each commit.
+8. **Run `/qa`** — Claude verifies every acceptance criterion against the code and posts results as Jira comments.
+9. **Run `/review`** — Claude reviews code quality and posts a verdict as Jira comments.
+10. **Run `/ci`** — Claude sets up GitHub Actions CI and closes the CI story in Jira.
+
+---
+
+## Slash Commands
+
+| Command | What it does |
+|---------|-------------|
+| `/product` | Runs the product agent — writes the project definition |
+| `/shape` | Runs the shape agent — designs the product shape |
+| `/scope` | Runs the scope agent — scopes the bet |
+| `/stories` | Runs the stories agent — writes user stories and creates Jira tickets |
+| `/implement` | Runs the implementation agent — writes iOS code and tests |
+| `/qa` | Runs the QA agent — verifies all acceptance criteria |
+| `/review` | Runs the review agent — code quality review |
+| `/ci` | Runs the CI agent — sets up GitHub Actions |
+| `/orchestrator` | Shows pipeline status and tells you which agent to run next |
+
+You can also pass an argument to target a specific story:
 
 ```
-Run the shape-agent on this project.
-Run the implementation-agent for story COUNTER-2.
+/implement COUNTER-2
 ```
 
-Claude will read the agent definition from `agents/`, follow its steps, and write the output.
+---
 
-## Folder Structure
+## Checking Where You Are
 
-```
-agents/          # Agent definitions (role, inputs, outputs, steps)
-docs/            # SDLC artifacts produced by agents
-src/             # iOS app source code (created by implementation-agent)
-.github/
-  workflows/     # CI (created by ci-agent)
-CLAUDE.md        # Session bootstrap for Claude Code
-AGENTS.md        # Overview of the human-agent contract
-```
+If you're not sure which stage you're on, run `/orchestrator`. It reads the current state of `docs/` and tells you:
 
-## Source of Truth
+- Which stages are done
+- Which stage is next
+- Whether you need to approve something before continuing
 
-Confluence stores the official SDLC documents for this project.
-This repo keeps local copies under `docs/` for Claude Code execution.
-When a doc changes, update **both** the Confluence page and the matching local file.
+---
+
+## Jira Integration
+
+When the Atlassian Rovo MCP is connected, agents automatically keep Jira in sync:
+
+- **Stories agent** creates tickets and assigns them to you (status: To Do)
+- **Implementation agent** moves each story to In Progress when work starts, then Done when committed
+- **QA agent** posts a pass/fail comment on each story's ticket
+- **Review agent** posts the review verdict as a comment on each story's ticket
+- **CI agent** closes the CI story when the workflow is committed
+
+The Jira project key is `KAN`. The mapping between local story IDs and Jira keys lives at the top of `docs/04-jira-stories.md`.
+
+---
+
+## Confluence Sync
+
+All SDLC documents have a matching Confluence page in the **MFS** space. Agents write both the local file and the Confluence page when they run.
 
 | Local file | Confluence page |
 |------------|-----------------|
@@ -67,9 +126,56 @@ When a doc changes, update **both** the Confluence page and the matching local f
 | `docs/04-jira-stories.md` | 04 - Jira Stories |
 | `docs/05-review-notes.md` | 05 - Review Notes |
 
-Confluence space: **MFS** — `https://amitrajoriya.atlassian.net/wiki/spaces/MFS`
+Confluence space: **MFS** — https://amitrajoriya.atlassian.net/wiki/spaces/MFS
+
+If you edit a doc manually, update both the local file and the Confluence page to keep them in sync.
+
+---
+
+## What Each Agent Does
+
+| Agent | Plain English |
+|-------|--------------|
+| **product-agent** | Turns your idea into a structured project definition — goals, users, requirements, and constraints |
+| **shape-agent** | Frames the problem and designs a solution at the right level of detail — not too vague, not too prescriptive |
+| **scope-agent** | Decides what's in and what's out for this cycle, and breaks the work into bite-sized slices |
+| **jira-stories-agent** | Writes implementation-ready user stories with clear acceptance criteria, then creates and assigns Jira tickets |
+| **implementation-agent** | Writes production-quality SwiftUI code story by story, with unit tests, following MVVM and SOLID principles |
+| **qa-agent** | Runs the test suite, checks every acceptance criterion against the actual code, and flags any gaps |
+| **review-agent** | Reviews code quality, architecture, test coverage, and Swift style — gives an Approved / Needs Changes verdict |
+| **ci-agent** | Creates a GitHub Actions workflow that builds and tests the app on every push and pull request |
+| **orchestrator-agent** | Reads the pipeline state and tells you exactly where you are and what to do next |
+
+---
+
+## Folder Structure
+
+```
+agents/          Agent definitions — each file is the full spec for one agent
+docs/            SDLC documents produced by agents (source of truth synced to Confluence)
+src/             iOS app source code (written by implementation-agent)
+.github/
+  workflows/     GitHub Actions CI (written by ci-agent)
+CLAUDE.md        Instructions Claude reads at the start of every session
+AGENTS.md        Overview of the human-agent contract and approval rules
+```
+
+---
+
+## Engineering Standards
+
+All code produced by this pipeline follows:
+
+- **MVVM architecture** — Model (plain Swift struct), ViewModel (`@Observable`, protocol-backed), View (pure SwiftUI, zero logic)
+- **SOLID principles** — especially Dependency Inversion: views depend on ViewModel protocols, not concrete classes
+- **Google Swift Style Guide** — naming, formatting, and documentation conventions
+- **Principal iOS Engineer standard** — production-quality, testable, idiomatic Swift
+- **SwiftUI only** — no UIKit, no third-party dependencies
+
+Full standards are documented in `CLAUDE.md`.
+
+---
 
 ## Current Project
 
-**Counter App** — Simple SwiftUI iOS counter with increment, decrement, and reset.
-See `docs/01-project-definition.md` for full spec.
+**Counter App** — A simple SwiftUI iOS counter with increment, decrement, and reset. All 7 stories are implemented and Done. See `docs/01-project-definition.md` for the full spec.
