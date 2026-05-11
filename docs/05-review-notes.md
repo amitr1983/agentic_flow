@@ -113,18 +113,18 @@ None. This is the initial implementation; no previously passing behaviour has be
 
 ### Findings
 
-| Severity | File | Line | Finding | Suggestion |
-|----------|------|------|---------|------------|
-| Minor | `CounterViewModelTests.swift` | 5 | `private var sut: any CounterViewModelProtocol = CounterViewModel()` — the class-level initialiser creates a `CounterViewModel` instance that is immediately discarded by `setUp()`. This wastes an allocation on every test class load. | Remove the `= CounterViewModel()` from the property declaration. Either make it implicitly unwrapped (`private var sut: (any CounterViewModelProtocol)!`) or initialise lazily via `setUp` only. |
-| Minor | `ci.yml` | 27–38 | The `Select simulator` step uses `sys.exit(1)` if no simulator is found, but the outer shell does not check the exit code of the `$()` subshell. Without `set -e`, `SIMULATOR_UDID` will be empty and the test step will fail with a cryptic destination error rather than a clear "no simulator found" message. | Add `set -euo pipefail` at the top of the step's `run` block so the step fails immediately and clearly if the Python script exits non-zero. |
-| Minor | `project.yml` | 6 | `xcodeVersion: "16"` is pinned but the local Xcode is 26.1. xcodegen uses this as a hint for compatibility settings — a mismatch may silently produce incorrect build settings on the runner. | Set `xcodeVersion` to match the actual Xcode major version in use, or omit it to let xcodegen auto-detect. |
-| Minor | `project.yml` | 8 | `SWIFT_VERSION: "5.9"` — Xcode 16+ defaults to Swift 6. While 5.9 still compiles, it opts the project out of Swift 6 concurrency checking, which is available and enforced by default in newer toolchains. | Bump to `SWIFT_VERSION: "6.0"` and verify there are no concurrency warnings (there shouldn't be — the codebase is simple and synchronous). |
-| Nit | `ContentView.swift` | 7–12 | Magic number literals: `VStack(spacing: 48)`, `HStack(spacing: 32)`, font size `80`, icon size `52`. These are layout constants scattered inline with no names. | Extract to `private enum Layout` with named static constants, e.g. `Layout.countFontSize`, `Layout.buttonIconSize`. Optional for a demo but required at production quality. |
-| Nit | `ContentView.swift` | 11–12 | `.contentTransition(.numericText())` and `.animation(.snappy, value:)` are applied directly to `Text`. While functional, the Google Swift Style Guide and SwiftUI idioms favour wrapping state-driven animations in `withAnimation {}` at the call site for explicit control, or applying `.animation()` higher in the view tree. | Consider moving the animation modifier to the `VStack` or wrapping ViewModel calls in `withAnimation { viewModel.increment() }`. |
-| Nit | `CounterTests.swift` | 57 | `(0..<5).forEach { _ in sut.increment() }` — functional but less readable than a `for` loop or 5 explicit calls. Per the Google Swift Style Guide, clarity is preferred over functional style when the two are equivalent. | Use `for _ in 0..<5 { sut.increment() }` for consistency with the rest of the test suite. |
-| Nit | `CounterViewModelTests.swift` | 55 | Same `(0..<5).forEach` pattern as above. | Same fix: `for _ in 0..<5 { sut.increment() }`. |
-| Nit | `Counter.swift` | 1 | No `///` documentation comment on the type. The Google Swift Style Guide (as adopted in `CLAUDE.md`) requires triple-slash docs on all public declarations. `Counter` is `internal` (default) so technically optional, but for a demo/interview project, docs on every type signal quality. | Add `/// Encapsulates counter state and provides increment, decrement, and reset operations.` above `struct Counter`. |
-| Nit | `CounterViewModelProtocol.swift` | 1 | Same as above — no `///` doc on the protocol. | Add a one-line triple-slash summary above the protocol declaration. |
+| Severity | File | Line | Finding | Suggestion | Status |
+|----------|------|------|---------|------------|--------|
+| Minor | `CounterViewModelTests.swift` | 5 | `private var sut: any CounterViewModelProtocol = CounterViewModel()` — class-level initialiser creates an instance immediately discarded by `setUp()`. | Use `private var sut: (any CounterViewModelProtocol)!` and assign only in `setUp`. | ✅ Resolved |
+| Minor | `ci.yml` | 27–38 | Missing `set -e` — empty `SIMULATOR_UDID` would produce a cryptic error rather than a clear failure. | Add `set -euo pipefail` at the top of the simulator selection step. | ✅ Resolved |
+| Minor | `project.yml` | 6 | `xcodeVersion: "16"` pinned but local Xcode is 26.1 — mismatch may silently produce incorrect build settings. | Omit `xcodeVersion` to let xcodegen auto-detect. | ✅ Resolved |
+| Minor | `project.yml` | 8 | `SWIFT_VERSION: "5.9"` opts out of Swift 6 concurrency checking. | Bump to `SWIFT_VERSION: "6.0"`. | ✅ Resolved |
+| Nit | `ContentView.swift` | 7–12 | Magic number literals for spacing and font sizes scattered inline. | Extract to `private enum Layout` with named constants. | ⏳ Open |
+| Nit | `ContentView.swift` | 11–12 | `.animation()` applied directly to `Text` rather than higher in the view tree. | Move to `VStack` or wrap calls in `withAnimation {}`. | ⏳ Open |
+| Nit | `CounterTests.swift` | 57 | `(0..<5).forEach { _ in sut.increment() }` — less readable than a `for` loop. | Use `for _ in 0..<5 { sut.increment() }`. | ✅ Resolved |
+| Nit | `CounterViewModelTests.swift` | 55 | Same `(0..<5).forEach` pattern. | Same fix: `for _ in 0..<5 { sut.increment() }`. | ✅ Resolved |
+| Nit | `Counter.swift` | 1 | No `///` doc comment on the type. | Add a triple-slash summary above `struct Counter`. | ⏳ Open |
+| Nit | `CounterViewModelProtocol.swift` | 1 | No `///` doc comment on the protocol. | Add a triple-slash summary above the protocol declaration. | ⏳ Open |
 
 ---
 

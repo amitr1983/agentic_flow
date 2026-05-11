@@ -54,7 +54,7 @@ final class CounterTests: XCTestCase {
 
     func testIncrementThenReset() {
         var sut = Counter()
-        (0..<5).forEach { _ in sut.increment() }
+        for _ in 0..<5 { sut.increment() }
         sut.reset()
         XCTAssertEqual(sut.count, 0)
     }

@@ -142,7 +142,7 @@ When the Atlassian Rovo MCP is connected, agents automatically keep Jira in sync
 - **Review agent** posts the review verdict as a comment on each story's ticket
 - **CI agent** closes the CI story when the workflow is committed
 
-The Jira project key is `KAN`. The mapping between local story IDs and Jira keys lives at the top of `docs/04-jira-stories.md`.
+The Jira project key is read from `config.yml` (`jira.project_key`). The mapping between local story IDs and Jira keys lives at the top of `docs/04-jira-stories.md`.
 
 ---
 
