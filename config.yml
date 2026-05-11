@@ -1,0 +1,30 @@
+# config.yml — project-level configuration for the agentic_flow pipeline
+#
+# Edit this file when starting a new project. All agents read from here
+# so you only need to change values in one place.
+
+project:
+  name: "Counter App"
+  description: "Simple SwiftUI iOS counter with increment, decrement, and reset"
+
+ios:
+  bundle_id_prefix: "com.amitrajoriya"
+  bundle_id: "com.amitrajoriya.CounterApp"
+  scheme: "CounterApp"
+  deployment_target: "17.0"
+  swift_version: "6.0"
+
+jira:
+  cloud_id: "amitrajoriya.atlassian.net"
+  project_key: "KAN"
+  story_prefix: "COUNTER"
+
+confluence:
+  cloud_id: "amitrajoriya.atlassian.net"
+  space_key: "MFS"
+  space_id: "131077"
+  parent_page_id: "131189"
+
+github:
+  repo: "amitr1983/agentic_flow"
+  default_branch: "main"

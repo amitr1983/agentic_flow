@@ -2,11 +2,17 @@
 
 This repo runs a human-in-the-loop multi-agent SDLC for iOS development.
 
+## Project Config
+
+All project-specific values (app name, bundle ID, Jira key, Confluence space, etc.) live in **`config.yml`** at the repo root. Read this file at the start of every session. When starting a new project, update `config.yml` first — agents derive all project-specific values from it.
+
 ## Pipeline
 
-Each step is owned by one agent. The human reviews and approves before the next step starts.
+The **orchestrator-agent** is the entry point — run it any time to check pipeline status and get the recommended next step. The remaining eight agents each own one stage. The human reviews and approves before the next step starts.
 
 ```
+orchestrator-agent  ←  run any time to check status and get next action
+        ↓
 product-agent  →  shape-agent  →  scope-agent  →  jira-stories-agent
                                                           ↓
 ci-agent  ←  review-agent  ←  qa-agent  ←  implementation-agent
@@ -18,6 +24,7 @@ Each agent's role, inputs, outputs, and steps are defined in `agents/`.
 
 | Agent | File | Writes To |
 |-------|------|-----------|
+| Orchestrator | `agents/orchestrator-agent.md` | *(pipeline status report only — no files written)* |
 | Product | `agents/product-agent.md` | `docs/01-project-definition.md` |
 | Shape | `agents/shape-agent.md` | `docs/02-shape.md` |
 | Scope | `agents/scope-agent.md` | `docs/03-bet-and-scope.md` |
@@ -132,12 +139,14 @@ Source: https://google.github.io/swift/
 
 ## Current State
 
-| Doc | Status |
-|-----|--------|
-| `docs/01-project-definition.md` | Done |
-| `docs/02-shape.md` | Pending |
-| `docs/03-bet-and-scope.md` | Pending |
-| `docs/04-jira-stories.md` | Pending |
-| `docs/05-review-notes.md` | Pending |
-| `src/` | Pending |
-| `.github/workflows/ci.yml` | Pending |
+| Artifact | Status | Notes |
+|----------|--------|-------|
+| `docs/01-project-definition.md` | ✅ Done | |
+| `docs/02-shape.md` | ✅ Done | |
+| `docs/03-bet-and-scope.md` | ✅ Done | |
+| `docs/04-jira-stories.md` | ✅ Done | All 7 stories — KAN-2 through KAN-8 |
+| `docs/05-review-notes.md` | ✅ Done | QA passed (16/16); review verdict: Approved with minor fixes |
+| `src/` | ✅ Done | MVVM, 16 tests pass, 0 warnings, Swift 6 |
+| `.github/workflows/ci.yml` | ✅ Done | Dynamic simulator selection, `set -euo pipefail` |
+| CI green run | ⏳ Pending | Human must confirm first green run in GitHub Actions |
+| COUNTER-4 smoke test | ⏳ Pending | Human must verify FR1–FR5 on iOS 17+ simulator |

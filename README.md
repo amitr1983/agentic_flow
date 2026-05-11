@@ -27,9 +27,11 @@ Before you start, make sure you have:
 
 ## How It Works
 
-There are eight agents, each responsible for one stage. You trigger an agent with a slash command, it does its work, and then you review the output. Only after you approve does the next stage begin.
+There are nine agents. The **orchestrator** is always available to tell you where you are and what to run next. The other eight each own one stage. You trigger an agent with a slash command, it does its work, and then you review the output. Only after you approve does the next stage begin.
 
 ```
+             /orchestrator  ←  run this any time to check pipeline status
+                    ↓
 You describe the project
         ↓
 1. /product   →  Writes the project definition doc
@@ -50,6 +52,36 @@ You describe the project
 ```
 
 At each stage, Claude writes a document or code, presents it to you, and waits. You say "looks good" or request changes. Nothing moves forward until you approve.
+
+---
+
+## Adapting to a New Project
+
+Everything project-specific lives in **`config.yml`** at the repo root. To use this pipeline for a different app, just update that one file:
+
+```yaml
+project:
+  name: "Your App Name"
+
+ios:
+  bundle_id: "com.yourcompany.YourApp"
+  scheme: "YourApp"
+  deployment_target: "17.0"
+
+jira:
+  project_key: "YOUR_KEY"
+  story_prefix: "STORY"
+
+confluence:
+  space_key: "YOUR_SPACE"
+  space_id: "123456"
+  parent_page_id: "789012"
+
+github:
+  repo: "yourorg/yourrepo"
+```
+
+All agents read from `config.yml`, so you never have to hunt through multiple files to change a project name or bundle ID.
 
 ---
 

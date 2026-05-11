@@ -111,18 +111,37 @@ None. This is the initial implementation; no previously passing behaviour has be
 
 ## Code Review
 
-> Filled by `review-agent` after QA.
-
 ### Findings
 
 | Severity | File | Line | Finding | Suggestion |
 |----------|------|------|---------|------------|
-|          |      |      |         |            |
+| Minor | `CounterViewModelTests.swift` | 5 | `private var sut: any CounterViewModelProtocol = CounterViewModel()` — the class-level initialiser creates a `CounterViewModel` instance that is immediately discarded by `setUp()`. This wastes an allocation on every test class load. | Remove the `= CounterViewModel()` from the property declaration. Either make it implicitly unwrapped (`private var sut: (any CounterViewModelProtocol)!`) or initialise lazily via `setUp` only. |
+| Minor | `ci.yml` | 27–38 | The `Select simulator` step uses `sys.exit(1)` if no simulator is found, but the outer shell does not check the exit code of the `$()` subshell. Without `set -e`, `SIMULATOR_UDID` will be empty and the test step will fail with a cryptic destination error rather than a clear "no simulator found" message. | Add `set -euo pipefail` at the top of the step's `run` block so the step fails immediately and clearly if the Python script exits non-zero. |
+| Minor | `project.yml` | 6 | `xcodeVersion: "16"` is pinned but the local Xcode is 26.1. xcodegen uses this as a hint for compatibility settings — a mismatch may silently produce incorrect build settings on the runner. | Set `xcodeVersion` to match the actual Xcode major version in use, or omit it to let xcodegen auto-detect. |
+| Minor | `project.yml` | 8 | `SWIFT_VERSION: "5.9"` — Xcode 16+ defaults to Swift 6. While 5.9 still compiles, it opts the project out of Swift 6 concurrency checking, which is available and enforced by default in newer toolchains. | Bump to `SWIFT_VERSION: "6.0"` and verify there are no concurrency warnings (there shouldn't be — the codebase is simple and synchronous). |
+| Nit | `ContentView.swift` | 7–12 | Magic number literals: `VStack(spacing: 48)`, `HStack(spacing: 32)`, font size `80`, icon size `52`. These are layout constants scattered inline with no names. | Extract to `private enum Layout` with named static constants, e.g. `Layout.countFontSize`, `Layout.buttonIconSize`. Optional for a demo but required at production quality. |
+| Nit | `ContentView.swift` | 11–12 | `.contentTransition(.numericText())` and `.animation(.snappy, value:)` are applied directly to `Text`. While functional, the Google Swift Style Guide and SwiftUI idioms favour wrapping state-driven animations in `withAnimation {}` at the call site for explicit control, or applying `.animation()` higher in the view tree. | Consider moving the animation modifier to the `VStack` or wrapping ViewModel calls in `withAnimation { viewModel.increment() }`. |
+| Nit | `CounterTests.swift` | 57 | `(0..<5).forEach { _ in sut.increment() }` — functional but less readable than a `for` loop or 5 explicit calls. Per the Google Swift Style Guide, clarity is preferred over functional style when the two are equivalent. | Use `for _ in 0..<5 { sut.increment() }` for consistency with the rest of the test suite. |
+| Nit | `CounterViewModelTests.swift` | 55 | Same `(0..<5).forEach` pattern as above. | Same fix: `for _ in 0..<5 { sut.increment() }`. |
+| Nit | `Counter.swift` | 1 | No `///` documentation comment on the type. The Google Swift Style Guide (as adopted in `CLAUDE.md`) requires triple-slash docs on all public declarations. `Counter` is `internal` (default) so technically optional, but for a demo/interview project, docs on every type signal quality. | Add `/// Encapsulates counter state and provides increment, decrement, and reset operations.` above `struct Counter`. |
+| Nit | `CounterViewModelProtocol.swift` | 1 | Same as above — no `///` doc on the protocol. | Add a one-line triple-slash summary above the protocol declaration. |
+
+---
 
 ### Overall Verdict
 
-<!-- review-agent fills this: Approved / Approved with minor fixes / Needs changes -->
+**Approved with minor fixes**
+
+No blockers. The architecture is clean and correct: MVVM layers are properly separated, business logic has zero SwiftUI imports, the ViewModel is protocol-backed for testability, and all 16 tests pass with zero compiler warnings. The two CI-related minors (missing `set -e` and `xcodeVersion` mismatch) are worth fixing before this workflow is relied on in a team setting. The Swift version minor is a forward-compatibility improvement. All nits are cosmetic and optional for this demo but expected at principal-engineer level in production.
+
+---
 
 ### Notes
 
-<!-- review-agent fills this: broader architectural observations -->
+**Architecture** — The MVVM layering is textbook clean. `Counter` (value type) → `CounterViewModel` (reference type, `@Observable`) → `ContentView` (pure view) is the correct iOS 17 pattern. The Dependency Inversion principle is properly applied: tests use `any CounterViewModelProtocol`, not the concrete class. No violations found.
+
+**Test quality** — Both test classes are well-structured. `CounterTests` correctly treats `Counter` as a value type (fresh `var sut` per test, no shared state). `CounterViewModelTests` correctly exercises the ViewModel through its protocol. The symmetric coverage across both layers (8 tests each, identical scenarios) is a good signal — if the model and the ViewModel ever diverge, a test will catch it.
+
+**Simplicity** — The implementation is correctly minimal. No unnecessary abstractions, no premature generics, no third-party dependencies. The only mild over-engineering concern is the animation modifiers in `ContentView`, which were not in scope but do not add complexity.
+
+**CI resilience** — The dynamic simulator selection via `xcrun simctl list` is the right call. The Python script is readable and correct in logic; it just needs the `set -e` guard to make failures obvious.
