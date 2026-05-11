@@ -2,7 +2,7 @@ import XCTest
 @testable import CounterApp
 
 final class CounterViewModelTests: XCTestCase {
-    private var sut: any CounterViewModelProtocol = CounterViewModel()
+    private var sut: (any CounterViewModelProtocol)!
 
     override func setUp() {
         super.setUp()

@@ -24,6 +24,7 @@ jobs:
 
       - name: Select simulator
         run: |
+          set -euo pipefail
           UDID=$(xcrun simctl list -j devices available | python3 -c "
           import json, sys
           data = json.load(sys.stdin)
