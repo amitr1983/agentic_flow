@@ -148,7 +148,7 @@ The Jira project key is `KAN`. The mapping between local story IDs and Jira keys
 
 ## Confluence Sync
 
-All SDLC documents have a matching Confluence page in the **MFS** space. Agents write both the local file and the Confluence page when they run.
+All SDLC documents have a matching Confluence page. The space key, space ID, and parent page ID are all set in `config.yml` — agents read from there, so you never hard-code them here.
 
 | Local file | Confluence page |
 |------------|-----------------|
@@ -158,7 +158,7 @@ All SDLC documents have a matching Confluence page in the **MFS** space. Agents 
 | `docs/04-jira-stories.md` | 04 - Jira Stories |
 | `docs/05-review-notes.md` | 05 - Review Notes |
 
-Confluence space: **MFS** — https://amitrajoriya.atlassian.net/wiki/spaces/MFS
+Confluence space and Jira project key are configured in `config.yml`. See that file for the current values.
 
 If you edit a doc manually, update both the local file and the Confluence page to keep them in sync.
 
@@ -210,4 +210,15 @@ Full standards are documented in `CLAUDE.md`.
 
 ## Current Project
 
-**Counter App** — A simple SwiftUI iOS counter with increment, decrement, and reset. All 7 stories are implemented and Done. See `docs/01-project-definition.md` for the full spec.
+**Counter App** — A simple SwiftUI iOS counter with increment, decrement, and reset.
+
+**Status: Mostly complete — pending human verification**
+
+All 7 stories implemented, all 16 tests pass, code review approved. Two items remain open and require a human to close them:
+
+- [ ] **CI green run** — check the [GitHub Actions tab](https://github.com/amitr1983/agentic_flow/actions) and confirm the workflow passes
+- [ ] **Manual smoke test** — launch the app on an iOS 17+ simulator, tap +, −, Reset, force-quit and relaunch; verify FR1–FR5
+
+Once both boxes are checked, the pipeline is fully complete.
+
+See `docs/01-project-definition.md` for the full spec.

@@ -1,6 +1,6 @@
 # Review Notes
 
-> **Status**: Pending — filled by `qa-agent` then `review-agent`.
+> **Status**: Done — QA passed (16/16 tests, 0 warnings); code review verdict: Approved with minor fixes (all minors resolved).
 
 ---
 
